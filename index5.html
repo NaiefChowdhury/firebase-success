@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<style>
+
+    .form-container {
+        width: 100vw;
+        height: 50vh;
+        display: grid;
+        place-items: center;
+    }
+    .add-product {
+        width: 60vw;
+        height: 90%;
+    }
+
+
+
+</style>
+
+<body>
+    <div class="form-container">
+        <form class="add-product">
+            <div class="form-group">
+                <input type="text" class="form-control" name="product" placeholder="Product Name">
+            </div>
+            <div class="form-group">
+                <input type="number" class="form-control" name="prize" placeholder="Prize">
+            </div>
+            <button type="submit" style="margin: 0px 0px;" class="btn btn-outline-success">ADD</button>
+        </form>
+    </div>
+    <div class="get-card">
+    </div>
+
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-analytics.js"></script>
+    <script src="parser.js"></script>
+
+    <script>
+        document.title = "Adding Products || ADMIN";
+        var firebaseConfig = {
+            apiKey: "AIzaSyBwYb3nEwcFW0hCeBBjAT4lNVouGnRezIk",
+            authDomain: "firestore-first-work.firebaseapp.com",
+            projectId: "firestore-first-work",
+            storageBucket: "firestore-first-work.appspot.com",
+            messagingSenderId: "803001938374",
+            appId: "1:803001938374:web:e3dad0ce5e81b4602fc2c7",
+            measurementId: "G-LSDLNVKCZ5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        const body = document.body;
+        const firestore = firebase.firestore();
+
+        const form = document.querySelector('.add-product');
+        const getCard = document.querySelector('.get-card');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            firestore.collection('DS').add({
+                Product: form.product.value,
+                Prize: form.prize.value
+            });
+            form.product.value = '';
+            form.prize.value = '';
+        });
+
+
+        function renderCafe(doc) {
+            const mainCard = document.createElement('div');
+            mainCard.setAttribute('class', 'card');
+            mainCard.setAttribute('data-id', doc.id);
+
+
+
+            const cardBody = document.createElement('div');
+            cardBody.setAttribute('class', 'card-body');
+            cardBody.setAttribute('data-id', doc.id);
+
+
+            // Product Name completed
+            const product = document.createElement('h5');
+            product.setAttribute('class', 'card-title');
+            product.textContent = doc.data().Product;
+
+            // Prize completed
+            const prize = document.createElement('p');
+            prize.setAttribute('class', 'card-text');
+            prize.textContent = doc.data().Prize + " Tk (প্রতি কেজি)";
+
+            // Edit Button completed
+            const edit = document.createElement('button');
+            edit.setAttribute('class', 'btn btn-dark');
+            edit.textContent = "EDIT";
+
+            // Delete Button completed
+            const del = document.createElement('button');
+            del.setAttribute('class', 'btn btn-outline-primary');
+            del.textContent = "DELETE";
+
+            cardBody.appendChild(product);
+            cardBody.appendChild(prize);
+            cardBody.appendChild(edit);
+            cardBody.appendChild(del);
+
+            mainCard.appendChild(cardBody);
+            getCard.appendChild(mainCard);
+
+
+            del.addEventListener('click', (e) => {
+                let id = e.target.parentElement.getAttribute('data-id');
+                firestore.collection('DS').doc(id).delete();
+            });
+
+            edit.addEventListener('click', (f) => {
+                cardBody.removeChild(product);
+                cardBody.removeChild(prize);
+
+                cardBody.removeChild(edit);
+                cardBody.removeChild(del);
+
+
+
+                const update = document.createElement('button');
+                update.textContent = 'UPDATE';
+                update.setAttribute('class', 'btn btn-dark');
+                const cancel = document.createElement('button');
+                cancel.textContent = 'CANCEL';
+                cancel.setAttribute('class', 'btn btn-outline-primary');
+
+
+
+                const product_input = document.createElement('input');
+                const prize_input = document.createElement('input');
+                product_input.setAttribute('type', 'text');
+                prize_input.setAttribute('type', 'number');
+                product_input.setAttribute('class', 'form-control');
+                prize_input.setAttribute('class', 'form-control');
+                product_input.setAttribute('placeholder', 'Product Name');
+                prize_input.setAttribute('placeholder', 'Prize');
+                product_input.value = product.textContent;
+                prize_input.value = parseInt(prize.textContent);
+
+                const br1 = document.createElement('br');
+                const br2 = document.createElement('br');
+
+
+                cardBody.appendChild(product_input);
+                cardBody.appendChild(br1);
+                cardBody.appendChild(prize_input);
+                cardBody.appendChild(br2);
+                cardBody.appendChild(update);
+                cardBody.appendChild(cancel);
+
+                update.addEventListener('click', (s) => {
+                    const id2 = s.target.parentElement.getAttribute('data-id');
+                    firestore.collection('DS').doc(id2).update({
+                        Product: product_input.value,
+                        Prize: prize_input.value
+                    });
+                    cardBody.removeChild(update);
+                    cardBody.removeChild(cancel);
+                    cardBody.removeChild(product_input);
+                    cardBody.removeChild(prize_input);
+                    cardBody.removeChild(br1);
+                    cardBody.removeChild(br2);
+
+                    const product_updated = document.createElement('h5');
+                    product_updated.setAttribute('class', 'card-title');
+                    product_updated.textContent = product_input.value;
+
+                    const prize_updated = document.createElement('p');
+                    prize_updated.setAttribute('class', 'card-text');
+                    prize_updated.textContent = prize_input.value + " Tk (প্রতি কেজি)";
+
+
+                    cardBody.appendChild(product_updated);
+                    cardBody.appendChild(prize_updated);
+                    cardBody.appendChild(edit);
+                    cardBody.appendChild(del);
+                });
+
+                cancel.addEventListener('click', (g) => {
+                    cardBody.removeChild(update);
+                    cardBody.removeChild(cancel);
+                    cardBody.removeChild(product_input);
+                    cardBody.removeChild(prize_input);
+                    cardBody.removeChild(br1);
+                    cardBody.removeChild(br2);
+                    cardBody.appendChild(product);
+                    cardBody.appendChild(prize);
+                    cardBody.appendChild(edit);
+                    cardBody.appendChild(del);
+                });
+            });
+
+        }
+
+
+        // firestore.collection('DS').orderBy('Product').get().then(snapshot => {
+        //     snapshot.docs.forEach(doc => {
+        //         renderCafe(doc);
+        //     });
+        // });
+
+
+        firestore.collection('DS').where('Prize','<','600').orderBy('Prize').onSnapshot(snapshot => {
+            const changes = snapshot.docChanges();
+            changes.forEach(change => {
+                if (change.type == 'added') {
+                    renderCafe(change.doc);
+                } else if (change.type == 'removed') {
+                    const main = getCard.querySelector('[data-id' + change.doc.id + ']');
+                    main.remove();
+                }
+            });
+        });
+
+
+        function naief() {
+            var parser = new UAParser();
+            var result = parser.getResult();
+        }
+        var options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+            };
+
+function success(pos) {
+  var crd = pos.coords;
+  var lat = crd.latitude;
+
+  console.log('Your current position is:');
+  console.log(`Latitude : ${crd.latitude}`);
+  console.log(`Longitude: ${crd.longitude}`);
+  console.log(`More or less ${crd.accuracy} meters.`);
+  return lat;
+}
+
+function error(err) {
+  console.warn(`ERROR(${err.code}): ${err.message}`);
+}
+
+navigator.geolocation.getCurrentPosition(success, error, options);
+
+
+
+    </script>
+
+</body>
+
+</html>
